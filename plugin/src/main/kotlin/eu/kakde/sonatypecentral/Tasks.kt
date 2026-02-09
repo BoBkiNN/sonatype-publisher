@@ -17,6 +17,8 @@ import okio.IOException
 import org.gradle.api.DefaultTask
 import org.gradle.api.publish.internal.PublicationInternal
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.GenerateMavenPom
+import org.gradle.api.publish.tasks.GenerateModuleMetadata
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -78,24 +80,31 @@ abstract class AggregateFiles
 
         // Copy and rename all publishable artifacts directly into temp dir
         val pub = publication as PublicationInternal<*>
-        // TODO ability to add custom files and tasks here
-        val sourcesJar = project.tasks.named("sourcesJar").get().outputs.files.singleFile
-        val javadocJar = project.tasks.named("javadocJar").get().outputs.files.singleFile
 
-        val allArtifacts = pub.publishableArtifacts.map { it.file } + listOf(sourcesJar, javadocJar)
-        allArtifacts.forEach { file ->
-            val newName = when (file.name) {
-                "pom-default.xml" -> "$artifactId-$version.pom"
-                "pom-default.xml.asc" -> "$artifactId-$version.pom.asc"
-                "module.json" -> "$artifactId-$version.module"
-                "module.json.asc" -> "$artifactId-$version.module.asc"
-                else -> "$artifactId-$version.${file.extension}"
+        pub.publishableArtifacts.forEach { it ->
+            val producerTasks = it.buildDependencies.getDependencies(null)
+//            println("Artifact ${it.file}, prod: $producerTasks")
+            val file = it.file
+            var newName = file.name
+            if (producerTasks.filterIsInstance<GenerateMavenPom>().isNotEmpty()) {
+                newName = when (file.name) {
+                    "pom-default.xml" -> "$artifactId-$version.pom"
+                    "pom-default.xml.asc" -> "$artifactId-$version.pom.asc"
+                    else -> file.name
+                }
+            } else if (producerTasks.filterIsInstance<GenerateModuleMetadata>().isNotEmpty()) {
+                newName = when (file.name) {
+                    "module.json" -> "$artifactId-$version.module"
+                    "module.json.asc" -> "$artifactId-$version.module.asc"
+                    else -> file.name
+                }
             }
             val targetFile = tempDirFile.resolve(newName)
             file.copyTo(targetFile, overwrite = true)
+//            println("Copied $file to $targetFile")
         }
 
-        println("Aggregated ${allArtifacts.size} artifacts into $directoryPath")
+        println("Aggregated ${pub.publishableArtifacts.size} artifacts into $directoryPath")
     }
 }
 
