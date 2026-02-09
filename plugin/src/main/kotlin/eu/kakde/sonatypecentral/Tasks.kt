@@ -16,12 +16,9 @@ import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.IOException
 import org.gradle.api.DefaultTask
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.internal.publication.MavenPublicationInternal
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
-import org.gradle.plugins.signing.SigningExtension
 import java.io.File
 import java.net.URISyntaxException
 import java.net.URLEncoder
