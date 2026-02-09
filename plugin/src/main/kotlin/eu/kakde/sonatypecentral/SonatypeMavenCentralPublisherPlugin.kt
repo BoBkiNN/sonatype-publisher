@@ -59,13 +59,10 @@ fun registerTasks(
     val buildDir = project.layout.buildDirectory.get().asFile.resolve("upload")
     val namespacePath = groupId.replace('.', File.separatorChar)
     val directoryPath = "${buildDir.path}/$namespacePath/$artifactId/$version"
-    val aggregateFiles = project.tasks.register("aggregateFiles", AggregateFiles::class.java)
+    val aggregateFiles = project.tasks.register("aggregateFiles",
+        AggregateFiles::class.java, mavenPublication)
     aggregateFiles.configure {
         it.directoryPath = directoryPath
-        it.publicationName = mavenPublication.name
-        it.groupId = groupId
-        it.artifactId = artifactId
-        it.version = version
     }
 
     // Calculate md5 and sha1 hash of all files in a given directory

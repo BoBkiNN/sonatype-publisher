@@ -50,28 +50,19 @@ abstract class GenerateMavenArtifacts
         }
     }
 
-abstract class AggregateFiles : DefaultTask() {
-    init {
-        this.dependsOn("generateMavenArtifacts")
+abstract class AggregateFiles
+@Inject constructor(
+    @Internal val publication: MavenPublication) : DefaultTask()
+{
+        init {
+            this.dependsOn("generateMavenArtifacts")
 
-        group = CUSTOM_TASK_GROUP
-        description = "Aggregate all files to a temporary directory."
-    }
+            group = CUSTOM_TASK_GROUP
+            description = "Aggregate all files to a temporary directory."
+        }
 
     @Internal
     var directoryPath: String = ""
-
-    @Internal
-    var publicationName: String = "maven"
-
-    @Internal
-    var groupId: String = project.group.toString()
-
-    @Internal
-    var artifactId: String = project.name
-
-    @Internal
-    var version: String = project.version.toString()
 
     @TaskAction
     fun action() {
@@ -84,8 +75,11 @@ abstract class AggregateFiles : DefaultTask() {
         val libsDir = buildDirectory.dir("libs").get().asFileTree
         filesToAggregate.addAll(libsDir.files)
 
+        val artifactId = publication.artifactId
+        val version = publication.version
+
         // Rename and Add all files from the publications/maven directory, e.g. pom-default.xml and pom-default.xml.asc
-        val mavenPublicationsDir = buildDirectory.dir("publications/$publicationName").orNull
+        val mavenPublicationsDir = buildDirectory.dir("publications/${publication.name}").orNull
         mavenPublicationsDir?.asFileTree?.forEach { file: File ->
             val newName =
                 when (file.name) {
