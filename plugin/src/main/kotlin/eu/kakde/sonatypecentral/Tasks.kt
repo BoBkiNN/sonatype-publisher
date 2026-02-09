@@ -52,14 +52,15 @@ abstract class GenerateMavenArtifacts
 
 abstract class AggregateFiles
 @Inject constructor(
-    @Internal val publication: MavenPublication) : DefaultTask()
-{
-        init {
-            this.dependsOn("generateMavenArtifacts")
+    @Internal val publication: MavenPublication
+) : DefaultTask() {
 
-            group = CUSTOM_TASK_GROUP
-            description = "Aggregate all files to a temporary directory."
-        }
+    init {
+        this.dependsOn("generateMavenArtifacts")
+
+        group = CUSTOM_TASK_GROUP
+        description = "Aggregate all publishable artifacts into a temporary directory with proper names."
+    }
 
     @Internal
     var directoryPath: String = ""
@@ -68,51 +69,28 @@ abstract class AggregateFiles
     fun action() {
         println("Executing AggregateFiles")
 
-        val filesToAggregate = mutableListOf<File>()
-        val buildDirectory = project.layout.buildDirectory
-
-        // Add all files from the libs directory
-        val libsDir = buildDirectory.dir("libs").get().asFileTree
-        filesToAggregate.addAll(libsDir.files)
+        val tempDirFile = File(directoryPath)
+        tempDirFile.mkdirs()
 
         val artifactId = publication.artifactId
         val version = publication.version
 
-        // Rename and Add all files from the publications/maven directory, e.g. pom-default.xml and pom-default.xml.asc
-        val mavenPublicationsDir = buildDirectory.dir("publications/${publication.name}").orNull
-        mavenPublicationsDir?.asFileTree?.forEach { file: File ->
-            val newName =
-                when (file.name) {
-                    "pom-default.xml" -> "$artifactId-$version.pom"
-                    "pom-default.xml.asc" -> "$artifactId-$version.pom.asc"
-                    "module.json" -> "$artifactId-$version.module"
-                    "module.json.asc" -> "$artifactId-$version.module.asc"
-                    else -> "$artifactId-$version.${file.name}"
-                }
-            filesToAggregate.add(renameFile(file, newName))
-        }
-
-        val versionCatalogDir = buildDirectory.dir("version-catalog").orNull
-        versionCatalogDir?.asFileTree?.forEach { file ->
-
-            val fileName = file.name
-            val newName =
-                when {
-                    fileName.endsWith("versions.toml") -> "$artifactId-$version.toml"
-                    fileName.endsWith("versions.toml.asc") -> "$artifactId-$version.toml.asc"
-                    else -> fileName
-                }
-
-            filesToAggregate.add(renameFile(file, newName))
-        }
-
-        val tempDirFile = File(directoryPath)
-        tempDirFile.mkdirs()
-        filesToAggregate.forEach { file ->
-            tempDirFile.let {
-                file.copyTo(it.resolve(file.name), overwrite = true)
+        // Copy and rename all publishable artifacts directly into temp dir
+        val pub = publication as PublicationInternal<*>
+        pub.publishableArtifacts.forEach { artifact ->
+            val file = artifact.file
+            val newName = when (file.name) {
+                "pom-default.xml" -> "$artifactId-$version.pom"
+                "pom-default.xml.asc" -> "$artifactId-$version.pom.asc"
+                "module.json" -> "$artifactId-$version.module"
+                "module.json.asc" -> "$artifactId-$version.module.asc"
+                else -> "$artifactId-$version.${file.extension}"
             }
+            val targetFile = tempDirFile.resolve(newName)
+            file.copyTo(targetFile, overwrite = true)
         }
+
+        println("Aggregated ${publication.publishableArtifacts.size} artifacts into $directoryPath")
     }
 }
 
