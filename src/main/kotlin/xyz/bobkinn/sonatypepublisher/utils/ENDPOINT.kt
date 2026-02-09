@@ -1,4 +1,4 @@
-package eu.kakde.sonatypecentral.utils
+package xyz.bobkinn.sonatypepublisher.utils
 
 object ENDPOINT {
     private const val PUBLISHER_BASEURL = "https://central.sonatype.com/api/v1/publisher"

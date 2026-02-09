@@ -1,4 +1,4 @@
-package eu.kakde.sonatypecentral.utils
+package xyz.bobkinn.sonatypepublisher.utils
 
 import java.io.File
 import java.io.FileInputStream
@@ -7,7 +7,7 @@ import java.security.MessageDigest
 
 object HashUtils {
     private const val STREAM_BUFFER_LENGTH = 1024
-    
+
     fun getCheckSumFromFile(digest: MessageDigest, file: File, toLowerCase: Boolean = true): String {
         FileInputStream(file).use { fis ->
             val hashBytes = updateDigest(digest, fis).digest()

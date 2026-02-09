@@ -1,9 +1,9 @@
-package eu.kakde.sonatypecentral
+package xyz.bobkinn.sonatypepublisher
 
 import com.google.gson.GsonBuilder
-import eu.kakde.sonatypecentral.utils.ENDPOINT
-import eu.kakde.sonatypecentral.utils.HashComputation
-import eu.kakde.sonatypecentral.utils.ZipUtils
+import xyz.bobkinn.sonatypepublisher.utils.ENDPOINT
+import xyz.bobkinn.sonatypepublisher.utils.HashComputation
+import xyz.bobkinn.sonatypepublisher.utils.ZipUtils
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient

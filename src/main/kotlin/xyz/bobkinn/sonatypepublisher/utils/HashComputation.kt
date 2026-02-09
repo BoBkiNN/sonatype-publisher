@@ -1,4 +1,4 @@
-package eu.kakde.sonatypecentral.utils
+package xyz.bobkinn.sonatypepublisher.utils
 
 import java.io.File
 import java.nio.charset.StandardCharsets.UTF_8

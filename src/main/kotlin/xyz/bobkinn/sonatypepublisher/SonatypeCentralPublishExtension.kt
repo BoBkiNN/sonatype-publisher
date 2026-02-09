@@ -1,4 +1,4 @@
-package eu.kakde.sonatypecentral
+package xyz.bobkinn.sonatypepublisher
 
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory

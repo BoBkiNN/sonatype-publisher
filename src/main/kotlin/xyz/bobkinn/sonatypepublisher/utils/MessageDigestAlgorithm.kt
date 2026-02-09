@@ -1,4 +1,4 @@
-package eu.kakde.sonatypecentral.utils
+package xyz.bobkinn.sonatypepublisher.utils
 
 object MessageDigestAlgorithm {
     const val MD5 = "MD5"

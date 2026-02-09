@@ -1,6 +1,6 @@
-package eu.kakde.sonatypecentral
+package xyz.bobkinn.sonatypepublisher
 
-import eu.kakde.sonatypecentral.SonatypeCentralPublishExtension.Companion.toSonatypeExtension
+import xyz.bobkinn.sonatypepublisher.SonatypeCentralPublishExtension.Companion.toSonatypeExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication
