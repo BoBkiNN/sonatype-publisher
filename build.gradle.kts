@@ -53,8 +53,8 @@ gradlePlugin {
         id = "xyz.bobkinn.sonatype-publisher"
         version = project.version
         implementationClass = "eu.kakde.sonatypecentral.SonatypeMavenCentralPublisherPlugin"
-        displayName = "Sonatype Maven Central Repository Publisher"
-        description = "Gradle plugin for building and uploading bundles to the Sonatype Maven Central Repository."
+        displayName = "Sonatype Publisher"
+        description = "Simple gradle plugin for building and uploading bundles to the Sonatype Maven Central Repository."
         tags = listOf("maven", "maven-central", "publish", "sonatype")
     }
 }
