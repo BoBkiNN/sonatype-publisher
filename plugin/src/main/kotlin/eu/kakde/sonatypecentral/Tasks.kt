@@ -3,7 +3,6 @@ package eu.kakde.sonatypecentral
 import com.google.gson.GsonBuilder
 import eu.kakde.sonatypecentral.utils.ENDPOINT
 import eu.kakde.sonatypecentral.utils.HashComputation
-import eu.kakde.sonatypecentral.utils.IOUtils.createDirectoryStructure
 import eu.kakde.sonatypecentral.utils.IOUtils.renameFile
 import eu.kakde.sonatypecentral.utils.ZipUtils
 import okhttp3.MediaType.Companion.toMediaType
