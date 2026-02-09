@@ -65,8 +65,6 @@ abstract class AggregateFiles
 
     @TaskAction
     fun action() {
-        println("Executing AggregateFiles")
-
         val tempDirFile = File(directoryPath).normalize()
         if (tempDirFile.exists()) tempDirFile.deleteRecursively()
         tempDirFile.mkdirs()
@@ -76,7 +74,7 @@ abstract class AggregateFiles
 
         // Copy and rename all publishable artifacts directly into temp dir
         val pub = publication as PublicationInternal<*>
-
+        println("Aggregating ${pub.publishableArtifacts.size} artifacts into $directoryPath")
         pub.publishableArtifacts.forEach { it ->
 //            val producerTasks = it.buildDependencies.getDependencies(null)
 //            println("Artifact ${it.file}, prod: $producerTasks")
@@ -92,8 +90,6 @@ abstract class AggregateFiles
             file.copyTo(targetFile, overwrite = true)
 //            println("Copied $file to $targetFile")
         }
-
-        println("Aggregated ${pub.publishableArtifacts.size} artifacts into $directoryPath")
     }
 }
 
