@@ -13,3 +13,31 @@ extensions.configure(SonatypeCentralPublishExtension::class) {
 ```
 3. Configure your publication with correct POM and setup signing
 4. Run task `publish<publication name>ToSonatype`
+
+## Adding to project:
+
+### If using JitPack:
+`settings.gradle.kts`:
+```kotlin
+pluginManagement {
+    repositories {
+        maven("https://jitpack.io")
+        gradlePluginPortal()
+    }
+
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "xyz.bobkinn.sonatype-publisher") {
+                useModule("com.github.BoBkiNN:sonatype-maven-central-publisher:${requested.version}")
+            }
+        }
+    }
+}
+```
+
+`build.gradle.kts`:
+```kotlin
+plugins {
+    id("xyz.bobkinn.sonatype-publisher") version "1.2.5"
+}
+```
