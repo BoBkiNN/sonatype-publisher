@@ -24,7 +24,7 @@ jobs:
 
       # 3️⃣ Setup Gradle Wrapper
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v5
 
       # 4️⃣ Display Gradle & Java versions
       - name: Verify environment
@@ -44,21 +44,15 @@ jobs:
           echo "Project version: $VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # 7️⃣ Create draft GitHub release
+      # 7️⃣ Create draft GitHub release and upload build/libs artifacts
       - name: Create draft release
-        id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
           name: Release ${{ steps.get_version.outputs.version }}
           draft: true
+          files: |
+            build/libs/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 8️⃣ Upload all files from build/libs to the release
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: build/libs/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
