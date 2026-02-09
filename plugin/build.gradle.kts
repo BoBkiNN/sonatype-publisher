@@ -19,14 +19,14 @@ repositories {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_1_8)
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
 java {
     withJavadocJar()
     withSourcesJar()
-    targetCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 dependencies {
