@@ -65,5 +65,4 @@ publishing.repositories {
 
 publishing.publications.create("main", MavenPublication::class) {
     from(components["java"])
-    artifactId = "sonatype-publisher"
 }
