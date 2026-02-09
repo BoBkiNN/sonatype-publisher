@@ -152,7 +152,7 @@ abstract class PublishToSonatypeCentral : DefaultTask() {
     @TaskAction
     fun uploadZip() {
         val pub = extension.publication.get()
-        println("Uploading publication $pub to Sonatype..")
+        println("Uploading publication ${pub.name} to Sonatype..")
         val username = extension.username.get()
         val password = extension.password.get()
         require(username.isNotBlank()) { "Sonatype username must not be empty" }
