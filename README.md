@@ -16,7 +16,7 @@ extensions.configure(SonatypeCentralPublishExtension::class) {
 
 ## Adding to project:
 
-### If using JitPack:
+Setup JitPack
 `settings.gradle.kts`:
 ```kotlin
 pluginManagement {
@@ -25,6 +25,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 
+    // optional resolution strategy to use correct id
     resolutionStrategy {
         eachPlugin {
             if (requested.id.id == "xyz.bobkinn.sonatype-publisher") {
