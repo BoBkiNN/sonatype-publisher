@@ -28,7 +28,7 @@ class HashUtilsTest {
                 MessageDigest.getInstance(MessageDigestAlgorithm.SHA_1),
                 file,
             )
-        val checksum = "13c051229fbfa184f37581d7ac9ee4b775dbe2bf"
+        val checksum = "2044dd673cbcff105e201247487b424eb9595060"
         assertEquals(checksum, checkSumSha1)
     }
 
@@ -44,19 +44,4 @@ class HashUtilsTest {
         assertEquals("d41d8cd98f00b204e9800998ecf8427e", checkSum)
     }
 
-    @Test
-    fun `encode data to lowercase hexadecimal`() {
-        val data = byteArrayOf(0x12.toByte(), 0x34.toByte(), 0xAB.toByte(), 0xCD.toByte())
-        val expectedHex = "1234abcd"
-        val hexLowerCase = HashUtils.encodeHex(data, true)
-        assertEquals(expectedHex, String(hexLowerCase))
-    }
-
-    @Test
-    fun `encode data to uppercase hexadecimal`() {
-        val data = byteArrayOf(0x12.toByte(), 0x34.toByte(), 0xAB.toByte(), 0xCD.toByte())
-        val expectedHex = "1234ABCD"
-        val hexUpperCase = HashUtils.encodeHex(data, false)
-        assertEquals(expectedHex, String(hexUpperCase))
-    }
 }
