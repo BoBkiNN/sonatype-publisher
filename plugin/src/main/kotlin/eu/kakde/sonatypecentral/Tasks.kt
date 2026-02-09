@@ -26,35 +26,16 @@ import java.io.File
 import java.net.URISyntaxException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
-import java.util.Base64
-import java.util.Locale
+import java.util.*
 import javax.inject.Inject
 
 abstract class GenerateMavenArtifacts
     @Inject
     constructor(
-        @Internal val componentType: String,
+        @Internal val tasks: List<String>,
     ) : DefaultTask() {
         init {
-            val commonDependencies =
-                arrayOf(
-                    "clean",
-                    "javadocJar",
-                    "sourcesJar",
-                    "generatePomFileForMavenPublication",
-                    "generateMetadataFileForMavenPublication",
-                )
-
-            val additionalDependencies =
-                when {
-                    componentType == "versionCatalog" -> emptyArray()
-                    project.hasProperty("bootJar") -> arrayOf("bootJar")
-                    else -> arrayOf("jar")
-                }
-
-            val dependencies = additionalDependencies + commonDependencies
-
-            this.dependsOn(*dependencies)
+            this.dependsOn(*tasks.toTypedArray())
 
             group = CUSTOM_TASK_GROUP
             description = "Generates all necessary artifacts for maven publication."
@@ -102,6 +83,9 @@ abstract class AggregateFiles : DefaultTask() {
     var directoryPath: String = ""
 
     @Internal
+    var publicationName: String = "maven"
+
+    @Internal
     var groupId: String = project.group.toString()
 
     @Internal
@@ -127,14 +111,14 @@ abstract class AggregateFiles : DefaultTask() {
         filesToAggregate.addAll(filesToAdd)
 
         // Rename and Add all files from the publications/maven directory, e.g. pom-default.xml and pom-default.xml.asc
-        val mavenPublicationsDir = buildDirectory.dir("publications/maven").orNull
+        val mavenPublicationsDir = buildDirectory.dir("publications/$publicationName").orNull
         mavenPublicationsDir?.asFileTree?.forEach { file: File ->
             val newName =
-                when {
-                    file.name == "pom-default.xml" -> "$artifactId-$version.pom"
-                    file.name == "pom-default.xml.asc" -> "$artifactId-$version.pom.asc"
-                    file.name == "module.json" -> "$artifactId-$version.module"
-                    file.name == "module.json.asc" -> "$artifactId-$version.module.asc"
+                when (file.name) {
+                    "pom-default.xml" -> "$artifactId-$version.pom"
+                    "pom-default.xml.asc" -> "$artifactId-$version.pom.asc"
+                    "module.json" -> "$artifactId-$version.module"
+                    "module.json.asc" -> "$artifactId-$version.module.asc"
                     else -> "$artifactId-$version.${file.name}"
                 }
             filesToAggregate.addLast(renameFile(file, newName))
@@ -229,7 +213,7 @@ abstract class PublishToSonatypeCentral : DefaultTask() {
         val groupId = extension.groupId.get()
         val artifactId = extension.artifactId.get()
         val version = extension.version.get()
-        val publishingType = extension.publishingType.get().uppercase(Locale.getDefault()) // AUTOMATIC
+        val publishingType = extension.publishingType.get().name
         val name = URLEncoder.encode("$groupId:$artifactId:$version", UTF_8)
 
         val credentials = "$username:$password"
