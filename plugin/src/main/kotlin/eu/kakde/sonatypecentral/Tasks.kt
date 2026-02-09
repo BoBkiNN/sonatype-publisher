@@ -38,12 +38,12 @@ abstract class GenerateMavenArtifacts
                     it.buildDependencies.getDependencies(null)
                 }
                 dependsOn(tasks)
-                println("Generate artifacts depends on $tasks")
+//                println("Generate artifacts depends on $tasks")
             }
             dependsOn(*additionalTasks.toTypedArray())
 
             group = CUSTOM_TASK_GROUP
-            description = "Generates all necessary artifacts for maven publication."
+            description = "Aggregator tasks to build publication artifacts"
         }
 
     }
