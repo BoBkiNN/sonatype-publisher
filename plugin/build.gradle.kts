@@ -49,7 +49,7 @@ gradlePlugin {
     website = "https://github.com/BoBkiNN/sonatype-maven-central-publisher.git"
     vcsUrl = "https://github.com/BoBkiNN/sonatype-maven-central-publisher.git"
 
-    val sonatypeMavenCentralPublish by plugins.creating {
+    plugins.creating {
         id = "xyz.bobkinn.sonatype-publisher"
         version = project.version
         implementationClass = "eu.kakde.sonatypecentral.SonatypeMavenCentralPublisherPlugin"
@@ -57,4 +57,12 @@ gradlePlugin {
         description = "Gradle plugin for building and uploading bundles to the Sonatype Maven Central Repository."
         tags = listOf("maven", "maven-central", "publish", "sonatype")
     }
+}
+
+publishing.repositories {
+    mavenLocal()
+}
+
+publishing.publications.create("main", MavenPublication::class) {
+    from(components["java"])
 }
