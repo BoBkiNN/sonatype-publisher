@@ -21,9 +21,7 @@ open class SonatypeCentralPublishExtension
         val artifactId: Property<String> = objectFactory.property(String::class.java)
         val version: Property<String> = objectFactory.property(String::class.java)
         val publishingType: Property<PublishingType> = objectFactory.property(PublishingType::class.java)
-        val collectedTasks: ListProperty<String> = objectFactory.listProperty(String::class.java).apply {
-            set(DEFAULT_TASKS)
-        }
+        val additionalTasks: ListProperty<String> = objectFactory.listProperty(String::class.java)
         val shaAlgorithms: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
         val username: Property<String> = objectFactory.property(String::class.java)
@@ -34,10 +32,5 @@ open class SonatypeCentralPublishExtension
         companion object {
             internal fun Project.toSonatypeExtension(): SonatypeCentralPublishExtension =
                 extensions.create("sonatypeCentralPublishExtension", SonatypeCentralPublishExtension::class.java)
-
-            val DEFAULT_TASKS = listOf("javadocJar",
-                "sourcesJar",
-                "generatePomFileForMavenPublication",
-                "generateMetadataFileForMavenPublication")
         }
     }

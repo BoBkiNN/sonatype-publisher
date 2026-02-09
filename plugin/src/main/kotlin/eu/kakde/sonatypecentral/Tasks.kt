@@ -16,6 +16,8 @@ import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.IOException
 import org.gradle.api.DefaultTask
+import org.gradle.api.publish.internal.PublicationInternal
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -29,10 +31,15 @@ import javax.inject.Inject
 abstract class GenerateMavenArtifacts
     @Inject
     constructor(
-        @Internal val tasks: List<String>,
+        @Internal val publication: MavenPublication,
+        @Internal val additionalTasks: List<String>,
     ) : DefaultTask() {
         init {
-            this.dependsOn(*tasks.toTypedArray())
+            if (publication is PublicationInternal<*>) {
+                val tasks = publication.publishableArtifacts.map { it.buildDependencies }
+                dependsOn(tasks)
+            }
+            dependsOn(*additionalTasks.toTypedArray())
 
             group = CUSTOM_TASK_GROUP
             description = "Generates all necessary artifacts for maven publication."

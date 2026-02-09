@@ -27,15 +27,15 @@ private fun execution(
 
     project.afterEvaluate {
         // Retrieve properties from custom extension
-        val collectedTasks = extension.collectedTasks.get()
+        val additionalTasks = extension.additionalTasks.get()
         val shaAlgorithms = extension.shaAlgorithms.get()
         val mavenPublication = extension.publication.get()
-        println("Configuring details - Collected tasks: $collectedTasks, Publication Name - ${mavenPublication.name}")
+        println("Configuring details - Collected tasks: $additionalTasks, Publication Name - ${mavenPublication.name}")
 
         registerTasks(
             project = project,
             mavenPublication = mavenPublication,
-            collectedTasks = collectedTasks,
+            additionalTasks = additionalTasks,
             shaAlgorithms = shaAlgorithms,
         )
     }
@@ -45,11 +45,11 @@ private fun execution(
 fun registerTasks(
     project: Project,
     mavenPublication: MavenPublication,
-    collectedTasks: List<String>,
+    additionalTasks: List<String>,
     shaAlgorithms: List<String>,
 ) {
     // Generate Maven Artifact task
-    project.tasks.register("generateMavenArtifacts", GenerateMavenArtifacts::class.java, collectedTasks)
+    project.tasks.register("generateMavenArtifacts", GenerateMavenArtifacts::class.java, mavenPublication, additionalTasks)
 
     val groupId = mavenPublication.groupId
     val artifactId = mavenPublication.artifactId
