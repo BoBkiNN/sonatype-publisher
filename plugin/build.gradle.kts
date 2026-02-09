@@ -9,10 +9,9 @@ plugins {
 }
 
 group = "xyz.bobkinn"
-version = "1.1.6"
+version = "1.1.7"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     gradlePluginPortal()
 }
@@ -38,7 +37,9 @@ dependencies {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
+        @Suppress("UnstableApiUsage")
+        getByName("test", JvmTestSuite::class) {
+            @Suppress("UnstableApiUsage")
             useKotlinTest(libs.versions.kotlinVersion.get())
         }
     }
