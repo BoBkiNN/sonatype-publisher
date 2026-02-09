@@ -48,8 +48,9 @@ fun registerTasks(
     additionalTasks: List<String>,
     shaAlgorithms: List<String>,
 ) {
+    val pubName = mavenPublication.name.capitalized()
     // Generate Maven Artifact task
-    project.tasks.register("generateMavenArtifacts", GenerateMavenArtifacts::class.java, mavenPublication, additionalTasks)
+    project.tasks.register("collect${pubName}Artifacts", GenerateMavenArtifacts::class.java, mavenPublication, additionalTasks)
 
     val groupId = mavenPublication.groupId
     val artifactId = mavenPublication.artifactId
@@ -59,7 +60,6 @@ fun registerTasks(
     val buildDir = project.layout.buildDirectory.get().asFile.resolve("upload")
     val namespacePath = groupId.replace('.', File.separatorChar)
     val directoryPath = "${buildDir.path}/$namespacePath/$artifactId/$version"
-    val pubName = mavenPublication.name.capitalized()
     val aggregateFiles = project.tasks.register("aggregate${pubName}Files",
         AggregateFiles::class.java, mavenPublication)
     aggregateFiles.configure {
