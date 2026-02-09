@@ -15,10 +15,13 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okio.IOException
 import org.gradle.api.DefaultTask
 import org.gradle.api.publish.internal.PublicationInternal
+import org.gradle.api.publish.maven.MavenArtifact
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
+import org.gradle.plugins.signing.Sign
 import java.io.File
 import java.net.URISyntaxException
 import java.net.URLEncoder
@@ -76,6 +79,7 @@ abstract class AggregateFiles
         pub.publishableArtifacts.forEach { it ->
 //            val producerTasks = it.buildDependencies.getDependencies(null)
 //            println("Artifact ${it.file}, prod: $producerTasks")
+            it as MavenArtifact
             val file = it.file
             var newName = when (file.name) {
                 "module.json" -> "$artifactId-$version.module"
@@ -83,6 +87,11 @@ abstract class AggregateFiles
                 "pom-default.xml" -> "$artifactId-$version.pom"
                 "pom-default.xml.asc" -> "$artifactId-$version.pom.asc"
                 else -> file.name
+            }
+            if (file.name.endsWith(".jar.asc") || file.name.endsWith(".jar")) {
+                val cls = it.classifier?.let { "-$it" } ?: ""
+                newName = "$artifactId-$version$cls.${it.extension}"
+//                println("were ${file.name}, become $newName")
             }
             val targetFile = tempDirFile.resolve(newName)
             file.copyTo(targetFile, overwrite = true)
