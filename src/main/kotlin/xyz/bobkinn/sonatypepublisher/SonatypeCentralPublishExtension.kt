@@ -19,7 +19,7 @@ open class SonatypeCentralPublishExtension
     constructor(objectFactory: ObjectFactory) {
         val publishingType: Property<PublishingType> = objectFactory.property(PublishingType::class.java)
         val additionalTasks: ListProperty<String> = objectFactory.listProperty(String::class.java)
-        val shaAlgorithms: ListProperty<String> = objectFactory.listProperty(String::class.java)
+        val additionalAlgorithms: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
         val username: Property<String> = objectFactory.property(String::class.java)
         val password: Property<String> = objectFactory.property(String::class.java)

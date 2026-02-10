@@ -28,7 +28,7 @@ private fun execution(
     project.afterEvaluate {
         // Retrieve properties from custom extension
         val additionalTasks = extension.additionalTasks.get()
-        val shaAlgorithms = extension.shaAlgorithms.get()
+        val additionalAlgorithms = extension.additionalAlgorithms.get()
         val mavenPublication = extension.publication.get()
 //        println("Configuring details - Additional tasks: $additionalTasks, Publication Name - ${mavenPublication.name}")
 
@@ -36,7 +36,7 @@ private fun execution(
             project = project,
             mavenPublication = mavenPublication,
             additionalTasks = additionalTasks,
-            shaAlgorithms = shaAlgorithms,
+            additionalAlgorithms = additionalAlgorithms,
         )
     }
 }
@@ -46,7 +46,7 @@ fun registerTasks(
     project: Project,
     mavenPublication: MavenPublication,
     additionalTasks: List<String>,
-    shaAlgorithms: List<String>,
+    additionalAlgorithms: List<String>,
 ) {
     val pubName = mavenPublication.name.capitalized()
     // Generate Maven Artifact task
@@ -69,7 +69,7 @@ fun registerTasks(
 
     // Calculate md5 and sha1 hash of all files in a given directory
     val t3 = project.tasks.register("compute${pubName}FilesHash",
-        ComputeHash::class.java, File(directoryPath), shaAlgorithms)
+        ComputeHash::class.java, File(directoryPath), additionalAlgorithms)
     t3.configure { it.dependsOn(aggregateFiles) }
 
     // Create a zip of all files in a given directory

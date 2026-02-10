@@ -102,16 +102,21 @@ abstract class ComputeHash
     @Inject
     constructor(
         @Internal val directory: File,
-        @Internal val shaAlgorithms: List<String>,
+        @Internal val additionalAlgorithms: List<String>,
     ) : DefaultTask() {
         init {
             group = CUSTOM_TASK_GROUP
             description = "Compute Hash of all files in a temporary directory."
         }
 
+    companion object {
+        val requiredAlgorithms = listOf("MD5", "SHA-1")
+    }
+
         @TaskAction
         fun run() {
-            HashComputation.computeAndSaveDirectoryHashes(directory, shaAlgorithms)
+            HashComputation.computeAndSaveDirectoryHashes(directory,
+                requiredAlgorithms + additionalAlgorithms)
         }
     }
 
