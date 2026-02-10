@@ -51,7 +51,7 @@ gradlePlugin {
 
     plugins.create("sonatype-publisher") {
         id = "xyz.bobkinn.sonatype-publisher"
-        implementationClass = "xyz.bobkinn.sonatypepublisher.SonatypeMavenCentralPublisherPlugin"
+        implementationClass = "xyz.bobkinn.sonatypepublisher.SonatypePublishPlugin"
         displayName = "Sonatype Publisher"
         description = "Simple gradle plugin for building and uploading bundles to the Sonatype Maven Central Repository."
         tags = listOf("maven", "maven-central", "publish", "sonatype")

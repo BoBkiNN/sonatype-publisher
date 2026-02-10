@@ -13,7 +13,7 @@ enum class PublishingType {
     USER_MANAGED
 }
 
-open class SonatypeCentralPublishExtension
+open class SonatypePublishExtension
 
     @Inject
     constructor(objectFactory: ObjectFactory) {
@@ -27,7 +27,7 @@ open class SonatypeCentralPublishExtension
         val publication: Property<MavenPublication> = objectFactory.property(MavenPublication::class.java)
 
         companion object {
-            internal fun Project.toSonatypeExtension(): SonatypeCentralPublishExtension =
-                extensions.create("sonatypeCentralPublishExtension", SonatypeCentralPublishExtension::class.java)
+            internal fun Project.toSonatypeExtension(): SonatypePublishExtension =
+                extensions.create("sonatypeCentralPublishExtension", SonatypePublishExtension::class.java)
         }
     }

@@ -148,7 +148,7 @@ abstract class PublishToSonatypeCentral : DefaultTask() {
         description = "Publish to New Sonatype Maven Central Repository."
     }
 
-    private val extension = project.extensions.getByType(SonatypeCentralPublishExtension::class.java)
+    private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
     private val zipFileProvider = project.layout.buildDirectory.file("upload.zip")
 
     @Throws(IOException::class, URISyntaxException::class)
@@ -206,7 +206,7 @@ abstract class GetDeploymentStatus : DefaultTask() {
     @Input
     var deploymentId: String = project.findProperty("deploymentId")?.toString() ?: ""
 
-    private val extension = project.extensions.getByType(SonatypeCentralPublishExtension::class.java)
+    private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
 
     @TaskAction
     fun executeTask() {
@@ -246,7 +246,7 @@ abstract class DropDeployment : DefaultTask() {
     @Input
     var deploymentId: String = project.findProperty("deploymentId")?.toString() ?: ""
 
-    private val extension = project.extensions.getByType(SonatypeCentralPublishExtension::class.java)
+    private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
 
     @TaskAction
     fun executeTask() {

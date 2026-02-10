@@ -1,6 +1,6 @@
 package xyz.bobkinn.sonatypepublisher
 
-import xyz.bobkinn.sonatypepublisher.SonatypeCentralPublishExtension.Companion.toSonatypeExtension
+import xyz.bobkinn.sonatypepublisher.SonatypePublishExtension.Companion.toSonatypeExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication
@@ -10,7 +10,7 @@ import java.io.File
 const val CUSTOM_TASK_GROUP = "Publish to Sonatype Central"
 
 @Suppress("unused")
-class SonatypeMavenCentralPublisherPlugin : Plugin<Project> {
+class SonatypePublishPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         // Configure Custom Extension
         val customExtension = project.toSonatypeExtension()
@@ -22,7 +22,7 @@ class SonatypeMavenCentralPublisherPlugin : Plugin<Project> {
 
 private fun execution(
     project: Project,
-    extension: SonatypeCentralPublishExtension,
+    extension: SonatypePublishExtension,
 ) {
 
     project.afterEvaluate {
