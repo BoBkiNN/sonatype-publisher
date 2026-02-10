@@ -7,7 +7,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.configurationcache.extensions.capitalized
 import java.io.File
 
-const val CUSTOM_TASK_GROUP = "Publish to Sonatype Central"
+const val CUSTOM_TASK_GROUP = "sonatypePublish"
 
 @Suppress("unused")
 class SonatypePublishPlugin : Plugin<Project> {
