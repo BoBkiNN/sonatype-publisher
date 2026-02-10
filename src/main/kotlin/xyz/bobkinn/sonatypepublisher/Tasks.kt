@@ -1,7 +1,7 @@
 package xyz.bobkinn.sonatypepublisher
 
 import com.google.gson.GsonBuilder
-import xyz.bobkinn.sonatypepublisher.utils.ENDPOINT
+import xyz.bobkinn.sonatypepublisher.utils.Endpoints
 import xyz.bobkinn.sonatypepublisher.utils.HashComputation
 import xyz.bobkinn.sonatypepublisher.utils.ZipUtils
 import okhttp3.MediaType.Companion.toMediaType
@@ -169,7 +169,7 @@ abstract class PublishToSonatypeCentral : DefaultTask() {
 
         val credentials = "$username:$password"
         val encodedCredentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
-        val url = "${ENDPOINT.UPLOAD}?publishingType=$publishingType&name=$name"
+        val url = "${Endpoints.UPLOAD}?publishingType=$publishingType&name=$name"
 
         val body =
             MultipartBody.Builder()
@@ -224,7 +224,7 @@ abstract class GetDeploymentStatus : DefaultTask() {
             Request.Builder()
                 .post(requestBody)
                 .addHeader("Authorization", "UserToken $encodedCredentials")
-                .url("${ENDPOINT.STATUS}?id=$deploymentId")
+                .url("${Endpoints.STATUS}?id=$deploymentId")
                 .build()
 
         val client = createHttpClient()
@@ -262,7 +262,7 @@ abstract class DropDeployment : DefaultTask() {
             Request.Builder()
                 .delete()
                 .addHeader("Authorization", "UserToken $encodedCredentials")
-                .url("${ENDPOINT.DEPLOYMENT}/$deploymentId")
+                .url("${Endpoints.DEPLOYMENT}/$deploymentId")
                 .build()
 
         val client = createHttpClient()

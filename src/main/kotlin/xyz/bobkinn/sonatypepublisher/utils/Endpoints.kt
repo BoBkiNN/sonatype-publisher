@@ -1,6 +1,6 @@
 package xyz.bobkinn.sonatypepublisher.utils
 
-object ENDPOINT {
+object Endpoints {
     private const val PUBLISHER_BASEURL = "https://central.sonatype.com/api/v1/publisher"
 
     const val UPLOAD = "$PUBLISHER_BASEURL/upload"
