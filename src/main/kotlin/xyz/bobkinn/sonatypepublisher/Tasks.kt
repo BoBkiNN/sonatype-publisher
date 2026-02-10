@@ -14,13 +14,19 @@ import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.IOException
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.publish.internal.PublicationInternal
 import org.gradle.api.publish.maven.MavenArtifact
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import java.io.File
 import java.net.URISyntaxException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
@@ -51,7 +57,8 @@ abstract class GenerateMavenArtifacts
 
 abstract class AggregateFiles
 @Inject constructor(
-    @Internal val publication: MavenPublication
+    @Internal val publication: MavenPublication,
+    val targetDirectory: Directory
 ) : DefaultTask() {
 
     init {
@@ -59,12 +66,9 @@ abstract class AggregateFiles
         description = "Aggregate all publishable artifacts into a temporary directory with proper names."
     }
 
-    @Internal
-    var directoryPath: String = ""
-
     @TaskAction
     fun action() {
-        val tempDirFile = File(directoryPath).normalize()
+        val tempDirFile = targetDirectory.asFile
         if (tempDirFile.exists()) tempDirFile.deleteRecursively()
         tempDirFile.mkdirs()
 
@@ -73,7 +77,7 @@ abstract class AggregateFiles
 
         // Copy and rename all publishable artifacts directly into temp dir
         val pub = publication as PublicationInternal<*>
-        println("Aggregating ${pub.publishableArtifacts.size} artifacts into $directoryPath")
+        println("Aggregating ${pub.publishableArtifacts.size} artifacts into $targetDirectory")
         pub.publishableArtifacts.forEach { it ->
 //            val producerTasks = it.buildDependencies.getDependencies(null)
 //            println("Artifact ${it.file}, prod: $producerTasks")
@@ -101,7 +105,7 @@ abstract class AggregateFiles
 abstract class ComputeHash
     @Inject
     constructor(
-        @Internal val directory: File,
+        @Internal val directory: Directory,
         @Internal val additionalAlgorithms: List<String>,
     ) : DefaultTask() {
         init {
@@ -115,41 +119,47 @@ abstract class ComputeHash
 
         @TaskAction
         fun run() {
-            HashComputation.computeAndSaveDirectoryHashes(directory,
+            HashComputation.computeAndSaveDirectoryHashes(directory.asFile,
                 requiredAlgorithms + additionalAlgorithms)
         }
     }
 
-abstract class CreateZip : DefaultTask() {
+abstract class CreateZip @Inject constructor(
+    @get:InputDirectory val fromDirectory: DirectoryProperty,
+    @get:OutputFile val zipFile: RegularFileProperty
+) : DefaultTask() {
+
     init {
-        group = CUSTOM_TASK_GROUP
+        group = "Custom"
         description = "Create a zip file comprising all files located within a temporary directory."
     }
 
-    // Folder path to be archived
-    @Internal
-    var folderPath: String? = ""
-
     @TaskAction
     fun createArchive() {
-        println("Creating zip file from the folder: $folderPath ")
-        folderPath?.let {
-            ZipUtils.prepareZipFile(
-                it,
-                project.layout.buildDirectory.get().asFile.resolve("upload.zip").path,
-            )
-        }
+        val source = fromDirectory.get().asFile
+        val target = zipFile.get().asFile
+
+        println("Creating zip file from: $source")
+        target.parentFile.mkdirs()
+
+        ZipUtils.prepareZipFile(
+            source.path,
+            target.path
+        )
     }
 }
 
-abstract class PublishToSonatypeCentral : DefaultTask() {
+abstract class PublishToSonatypeCentral(
+    @InputFile
+    val zipFile: RegularFileProperty
+) : DefaultTask() {
+
     init {
         group = CUSTOM_TASK_GROUP
         description = "Publish to New Sonatype Maven Central Repository."
     }
 
     private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
-    private val zipFileProvider = project.layout.buildDirectory.file("upload.zip")
 
     @Throws(IOException::class, URISyntaxException::class)
     @TaskAction
@@ -176,7 +186,7 @@ abstract class PublishToSonatypeCentral : DefaultTask() {
                 .addFormDataPart(
                     "bundle",
                     "upload.zip",
-                    zipFileProvider.get().asFile.asRequestBody("application/zip".toMediaType()),
+                    zipFile.get().asFile.asRequestBody("application/zip".toMediaType()),
                 )
                 .build()
 
