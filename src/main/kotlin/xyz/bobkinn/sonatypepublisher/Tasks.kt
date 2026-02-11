@@ -14,7 +14,6 @@ import xyz.bobkinn.sonatypepublisher.utils.PublisherApi
 import xyz.bobkinn.sonatypepublisher.utils.ZipUtils
 import java.io.File
 import javax.inject.Inject
-import kotlin.math.log
 
 abstract class BuildPublicationArtifacts
     @Inject
