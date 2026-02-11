@@ -62,7 +62,8 @@ abstract class AggregateFiles
 
         // Copy and rename all publishable artifacts directly into temp dir
         val pub = publication as PublicationInternal<*>
-        println("Aggregating ${pub.publishableArtifacts.size} artifacts into $folder")
+        logger.lifecycle("Aggregating ${pub.publishableArtifacts.size} artifacts" +
+                " into ${folder.relativeTo(project.rootDir)}")
         pub.publishableArtifacts.forEach { it ->
 //            val producerTasks = it.buildDependencies.getDependencies(null)
 //            println("Artifact ${it.file}, prod: $producerTasks")
@@ -124,13 +125,10 @@ abstract class CreateZip @Inject constructor(
         val source = fromDirectory.get().asFile
         val target = zipFile.get().asFile
 
-        println("Creating zip file from: $source")
+        logger.lifecycle("Creating zip file from: ${source.relativeTo(project.rootDir)}")
         target.parentFile.mkdirs()
-
-        ZipUtils.prepareZipFile(
-            source.path,
-            target.path
-        )
+        ZipUtils.prepareZipFile(source, target)
+        logger.lifecycle("Zip created at ${target.relativeTo(project.rootDir)}")
     }
 }
 

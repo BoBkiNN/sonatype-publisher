@@ -8,22 +8,15 @@ import java.util.zip.ZipOutputStream
 
 object ZipUtils {
     fun prepareZipFile(
-        folderPath: String,
-        zipFilePath: String,
+        sourceFolder: File,
+        zipFile: File,
     ) {
-        val sourceFolder = File(folderPath)
-        val zipFile = File(zipFilePath)
-
-        if (!sourceFolder.exists()) {
-            println("Source folder does not exist.")
-            return
+        if (sourceFolder.exists().not()) {
+            throw IllegalArgumentException("Source folder $sourceFolder does not exist")
         }
-
         ZipOutputStream(FileOutputStream(zipFile)).use { zipOut ->
             zipDirectory(sourceFolder, sourceFolder, zipOut)
         }
-
-        println("Zip file created successfully at location: ${zipFile.absolutePath}")
     }
 
     private fun zipDirectory(
