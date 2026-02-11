@@ -39,6 +39,7 @@ abstract class GenerateMavenArtifacts
 abstract class AggregateFiles
 @Inject constructor(
     @Internal val publication: MavenPublication,
+    @OutputDirectory
     val targetDirectory: Directory
 ) : DefaultTask() {
 
@@ -130,7 +131,7 @@ abstract class CreateZip @Inject constructor(
     }
 }
 
-abstract class PublishToSonatypeCentral(
+abstract class PublishToSonatypeCentral @Inject constructor(
     @InputFile
     val zipFile: RegularFileProperty
 ) : DefaultTask() {

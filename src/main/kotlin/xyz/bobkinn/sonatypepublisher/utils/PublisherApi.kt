@@ -144,7 +144,7 @@ object PublisherApi {
         val deploymentId: String,
         val deploymentName: String,
         val deploymentState: DeploymentState,
-        val errors: List<String>
+        val errors: Any
     )
 
     fun getDeploymentStatus(id: String, username: String, password: String): DeploymentStatus {
