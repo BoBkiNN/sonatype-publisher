@@ -48,7 +48,7 @@ plugins {
 
 ## About fork:
 Based on [sonatype-maven-central-publisher](https://github.com/ani2fun/sonatype-maven-central-publisher),
-i have introduced critical changes, code improvements and fixes, 
+I have introduced critical changes, code improvements and fixes, 
 targeting different goal to work with existing publications.
 
 Fixed issues:
