@@ -1,16 +1,7 @@
 package xyz.bobkinn.sonatypepublisher
 
-import com.google.gson.GsonBuilder
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okhttp3.logging.HttpLoggingInterceptor
-import okio.IOException
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -18,13 +9,9 @@ import org.gradle.api.publish.internal.PublicationInternal
 import org.gradle.api.publish.maven.MavenArtifact
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.*
-import xyz.bobkinn.sonatypepublisher.utils.Endpoints
 import xyz.bobkinn.sonatypepublisher.utils.HashUtils
+import xyz.bobkinn.sonatypepublisher.utils.PublisherApi
 import xyz.bobkinn.sonatypepublisher.utils.ZipUtils
-import java.net.URISyntaxException
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets.UTF_8
-import java.util.*
 import javax.inject.Inject
 
 abstract class GenerateMavenArtifacts
@@ -143,17 +130,6 @@ abstract class CreateZip @Inject constructor(
     }
 }
 
-fun Request.Builder.addAuth(extension: SonatypePublishExtension): Request.Builder {
-    val username = extension.username.get()
-    val password = extension.password.get()
-    require(username.isNotBlank()) { "Sonatype username must not be empty" }
-    require(password.isNotBlank()) { "Sonatype password must not be empty" }
-    val credentials = "$username:$password"
-    val encodedCredentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
-    addHeader("Authorization", "UserToken $encodedCredentials")
-    return this
-}
-
 abstract class PublishToSonatypeCentral(
     @InputFile
     val zipFile: RegularFileProperty
@@ -166,43 +142,17 @@ abstract class PublishToSonatypeCentral(
 
     private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
 
-    @Throws(IOException::class, URISyntaxException::class)
     @TaskAction
     fun uploadZip() {
         val pub = extension.publication.get()
-        println("Uploading publication ${pub.name} to Sonatype..")
-
-        val groupId = pub.groupId
-        val artifactId = pub.artifactId
-        val version = pub.version
-        val publishingType = extension.publishingType.get().name
-        val name = URLEncoder.encode("$groupId:$artifactId:$version", UTF_8)
-
-        val url = "${Endpoints.UPLOAD}?publishingType=$publishingType&name=$name"
-
-        val body =
-            MultipartBody.Builder()
-                .addFormDataPart(
-                    "bundle",
-                    "upload.zip",
-                    zipFile.get().asFile.asRequestBody("application/zip".toMediaType()),
-                )
-                .build()
-
-        val request =
-            Request.Builder()
-                .post(body)
-                .addAuth(extension)
-                .url(url)
-                .build()
-
-        val client = createHttpClient()
-        val response = client.newCall(request).execute()
-        handleResponse(
-            response,
-            successMessage = "Published to Maven central. Deployment ID:",
-            failureMessage = "Cannot publish to Maven Central.",
-        )
+        logger.lifecycle("Uploading publication ${pub.name} to Sonatype..")
+        val id = try {
+            PublisherApi.uploadBundle(zipFile.get(), extension.publishingType.get(),
+                pub, extension.username.get(), extension.password.get())
+        } catch (e: PublisherApi.PortalApiError) {
+            throw GradleException("Failed to perform upload", e)
+        }
+        logger.lifecycle("Publication uploaded with deployment id $id")
     }
 }
 
@@ -219,23 +169,14 @@ abstract class GetDeploymentStatus : DefaultTask() {
 
     @TaskAction
     fun executeTask() {
-        println("Executing 'getDeploymentStatus' task... With parameter deploymentId=$deploymentId")
-        val requestBody = "".toRequestBody("application/json".toMediaType())
-
-        val request =
-            Request.Builder()
-                .post(requestBody)
-                .addAuth(extension)
-                .url("${Endpoints.STATUS}?id=$deploymentId")
-                .build()
-
-        val client = createHttpClient()
-        val response = client.newCall(request).execute()
-        handleResponse(
-            response,
-            successMessage = "Deployment Status:",
-            failureMessage = "Failed to get deployment status.",
-        )
+        logger.lifecycle("Getting deployment status for $deploymentId")
+        val status = try {
+            PublisherApi.getDeploymentStatus(deploymentId, extension.username.get(), extension.password.get())
+        } catch (e: PublisherApi.PortalApiError) {
+            throw GradleException("Failed to get deployment status", e)
+        }
+        val json = PublisherApi.gson.toJson(status)
+        logger.lifecycle("Got deployment status:\n$json")
     }
 }
 
@@ -252,49 +193,12 @@ abstract class DropDeployment : DefaultTask() {
 
     @TaskAction
     fun executeTask() {
-        println("Dropping deployment for deploymentId=$deploymentId ...")
-
-        val request =
-            Request.Builder()
-                .delete()
-                .addAuth(extension)
-                .url("${Endpoints.DEPLOYMENT}/$deploymentId")
-                .build()
-
-        val client = createHttpClient()
-        val response = client.newCall(request).execute()
-        handleResponse(response, "Deployment Dropped Successfully for Deployment ID: $deploymentId", "Failed to drop the deployment.")
+        logger.lifecycle("Dropping deployment for deploymentId=$deploymentId ...")
+        try {
+            PublisherApi.dropDeployment(deploymentId, extension.username.get(), extension.password.get())
+        } catch (e: PublisherApi.PortalApiError) {
+            throw GradleException("Failed to perform drop", e)
+        }
+        logger.lifecycle("Deployment $deploymentId dropped successfully")
     }
 }
-
-private fun createHttpClient(): OkHttpClient {
-    return OkHttpClient.Builder()
-        .addInterceptor(
-            HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.HEADERS
-            },
-        )
-        .build()
-}
-
-private fun handleResponse(
-    response: Response,
-    successMessage: String,
-    failureMessage: String,
-) {
-    val responseBody = response.body?.string()
-    val gson = GsonBuilder().setPrettyPrinting().create()
-    if (!response.isSuccessful) {
-        val statusCode = response.code
-        val errorMessage = gson.fromJson(responseBody, ErrorMessage::class.java) ?: ErrorMessage(Error("Unknown Error: $responseBody"))
-        println("$failureMessage\nHTTP Status Code: $statusCode\nError Message: ${errorMessage.error.message}")
-    } else {
-        val jsonObject = gson.fromJson(responseBody, Any::class.java)
-        val prettyJsonString = gson.toJson(jsonObject)
-        println("$successMessage\n$prettyJsonString")
-    }
-}
-
-data class ErrorMessage(val error: Error)
-
-data class Error(val message: String)
