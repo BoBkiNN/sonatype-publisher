@@ -24,9 +24,19 @@ abstract class SonatypePublishConfig @Inject constructor(
     val publishingType: Property<PublishingType> =
         objects.property(PublishingType::class.java)
 
+    /**
+     * Additional tasks used to build artifacts
+     */
     val additionalTasks: ListProperty<String> =
         objects.listProperty(String::class.java)
 
+    /**
+     * List of hashing algorithm names to include into publication bundle.
+     *
+     * SHA-1 and MD5 are already included because they are required for central.
+     * See [MessageDigest Algorithms section](https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#messagedigest-algorithms)
+     * to find out what other algorithms can be used.
+     */
     val additionalAlgorithms: ListProperty<String> =
         objects.listProperty(String::class.java)
 
@@ -36,10 +46,14 @@ abstract class SonatypePublishConfig @Inject constructor(
     val password: Property<String> =
         objects.property(String::class.java)
 
+    /**
+     * Publication which artifacts will be built and included into publication.<br>
+     */
     val publication: Property<MavenPublication> =
         objects.property(MavenPublication::class.java)
 }
 
+@Suppress("unused")
 abstract class SonatypePublishExtension @Inject constructor(
     objects: ObjectFactory
 ) : NamedDomainObjectContainer<SonatypePublishConfig>
