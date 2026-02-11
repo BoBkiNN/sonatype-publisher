@@ -14,6 +14,7 @@ import xyz.bobkinn.sonatypepublisher.utils.PublisherApi
 import xyz.bobkinn.sonatypepublisher.utils.ZipUtils
 import java.io.File
 import javax.inject.Inject
+import kotlin.math.log
 
 abstract class BuildPublicationArtifacts
     @Inject
@@ -160,6 +161,10 @@ abstract class PublishToSonatypeCentral @Inject constructor(
             throw GradleException("Failed to perform upload", e)
         }
         logger.lifecycle("Publication uploaded with deployment id $id")
+
+        logger.debug("Writing deployment status..")
+        StoredDeploymentsManager.putCurrent(project, Deployment(id))
+        logger.debug("Deployment data updated")
     }
 }
 
@@ -186,6 +191,22 @@ abstract class GetDeploymentStatus : DefaultTask() {
         }
         val json = PublisherApi.gson.toJson(status)
         logger.lifecycle("Got deployment status:\n$json")
+
+        logger.debug("Updating deployment data..")
+        if (status.isPublished) {
+            logger.debug("Moving deployment to published list")
+            val dep = Deployment(deploymentId, status, System.currentTimeMillis())
+            // put to published
+            StoredDeploymentsManager.putPublished(project, dep)
+            // remove from current
+            StoredDeploymentsManager.removeCurrent(project, deploymentId)
+        } else {
+            logger.debug("Updating current deployments list..")
+            // update current
+            StoredDeploymentsManager.update(project, deploymentId) {
+                it?.update(status) // update status if already listed
+            }
+        }
     }
 }
 
@@ -209,5 +230,8 @@ abstract class DropDeployment : DefaultTask() {
             throw GradleException("Failed to perform drop", e)
         }
         logger.lifecycle("Deployment $deploymentId dropped successfully")
+
+        logger.debug("Removing deployment from current list..")
+        StoredDeploymentsManager.removeCurrent(project, deploymentId)
     }
 }

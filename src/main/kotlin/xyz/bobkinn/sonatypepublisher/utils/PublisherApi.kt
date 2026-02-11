@@ -145,7 +145,9 @@ object PublisherApi {
         val deploymentName: String,
         val deploymentState: DeploymentState,
         val errors: Any
-    )
+    ) {
+        val isPublished = deploymentState == DeploymentState.PUBLISHED
+    }
 
     fun getDeploymentStatus(id: String, username: String, password: String): DeploymentStatus {
         var url = "$BASE_URL/status?id=$id"
