@@ -79,27 +79,21 @@ fun registerTasksPipeline(
 
     val aggregateFiles = project.tasks.register("aggregate${name}Files",
         AggregateFiles::class.java, pub, filesFolder)
-    aggregateFiles.configure {
-        it.dependsOn(buildArtifacts)
-    }
+    aggregateFiles.configure { it.dependsOn(buildArtifacts) }
 
     // Calculate md5 and sha1 hash of all files in a given directory
-    val computeHashes = project.tasks.register("compute${name}FilesHash",
-        ComputeHash::class.java, filesFolder, additionalAlgorithms)
+    val computeHashes = project.tasks.register("compute${name}FileHashes",
+        ComputeHashes::class.java, filesFolder, additionalAlgorithms)
     computeHashes.configure { it.dependsOn(aggregateFiles) }
 
     // Create a zip of all files in a given directory
-    val archiveFileProp = pubFolder.map { it.file(UPLOAD_ZIP_NAME) }
+    val archiveFile = pubFolder.map { it.file(UPLOAD_ZIP_NAME) }
     val createZip = project.tasks.register("create${name}Zip", CreateZip::class.java,
-        aggregateFolder, archiveFileProp)
-    createZip.configure {
-        it.dependsOn(computeHashes)
-    }
+        aggregateFolder, archiveFile)
+    createZip.configure { it.dependsOn(computeHashes) }
 
     // Publish to Sonatype Maven Central Repository
     project.tasks.register("publish${name}ToSonatype", PublishToSonatypeCentral::class.java,
-        archiveFileProp, config)
-        .configure {
-        it.dependsOn(createZip)
-    }
+        archiveFile, config)
+        .configure { it.dependsOn(createZip) }
 }

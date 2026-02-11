@@ -88,7 +88,7 @@ abstract class AggregateFiles
     }
 }
 
-abstract class ComputeHash
+abstract class ComputeHashes
     @Inject
     constructor(
         @Internal val directory: Provider<Directory>,
