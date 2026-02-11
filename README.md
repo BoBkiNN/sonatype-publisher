@@ -1,6 +1,13 @@
-# Simple gradle plugin to publish maven publication to Sonatype Central Portal
+# sonatype-publisher
 
-This plugin builds and uploads existing maven publication to Maven Central Repository
+<!--suppress HtmlDeprecatedAttribute -->
+<div align="center">
+
+![JitPack](https://img.shields.io/jitpack/version/com.github.BoBkiNN/sonatype-publisher)
+
+</div>
+
+This simple plugin builds and uploads existing maven publication to Maven Central Repository
 using [Portal Publisher API](https://central.sonatype.org/publish/publish-portal-api/)
 
 ## Usage:
