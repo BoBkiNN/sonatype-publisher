@@ -149,7 +149,7 @@ object PublisherApi {
         val isPublished = deploymentState == DeploymentState.PUBLISHED
     }
 
-    fun getDeploymentStatus(id: String, username: String, password: String): DeploymentStatus {
+    fun getDeploymentStatus(id: String, username: String, password: String): DeploymentStatus? {
         var url = "$BASE_URL/status?id=$id"
 
         val request = Request.Builder()
@@ -159,8 +159,9 @@ object PublisherApi {
             .build()
         val client = createHttpClient()
         client.newCall(request).execute().use { r ->
+            if (r.code == 404) return null
             if (!r.isSuccessful) {
-                throw PortalApiError("Failed to drop deployment", r.toPortalApiError())
+                throw PortalApiError("Failed to get deployment status", r.toPortalApiError())
             }
             r.body?.let {b ->
                 try {
