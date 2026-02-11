@@ -7,11 +7,12 @@ using [Portal Publisher API](https://central.sonatype.org/publish/publish-portal
 1. Add and apply plugin
 2. Configure extension:
 ```kotlin
-extensions.configure(SonatypeCentralPublishExtension::class) {
-    publication = publishing.publications["main"] as MavenPublication // publication to use
+extensions.configure(SonatypePublishExtension::class) {
     username = System.getenv("MAVEN_CENTRAL_USERNAME")
     password = System.getenv("MAVEN_CENTRAL_PASSWORD")
-    publishingType = PublishingType.USER_MANAGED // or AUTOMATIC to publish on ready
+    publishingType = PublishingType.USER_MANAGED
+
+    registerMaven(publishing.publications.named("main", MavenPublication::class))
 }
 ```
 3. Configure your publication with correct POM and setup signing
@@ -24,14 +25,14 @@ Setup JitPack plugin repository in `settings.gradle.kts`:
 ```kotlin
 pluginManagement {
     repositories {
-        maven("https://jitpack.io")
+        maven("https://jitpack.io") // add JitPack repository
         gradlePluginPortal()
     }
 
     // optional resolution strategy to use correct id
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id == "xyz.bobkinn.sonatype-publisher") {
+            if (requested.id.id == "io.github.bobkinn.sonatype-publisher") {
                 useModule("com.github.BoBkiNN:sonatype-maven-central-publisher:${requested.version}")
             }
         }
@@ -42,7 +43,7 @@ pluginManagement {
 Add and apply plugin in `build.gradle.kts`:
 ```kotlin
 plugins {
-    id("xyz.bobkinn.sonatype-publisher") version "1.2.5"
+    id("io.github.bobkinn.sonatype-publisher") version "2.0.1"
 }
 ```
 
