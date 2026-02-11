@@ -39,7 +39,7 @@ object HashUtils {
         val ext= getExtension(digest.algorithm)
         val fileName = "${file.name}.$ext"
         val targetFile = File(file.parent, fileName)
-        file.bufferedWriter(UTF_8).use {
+        targetFile.bufferedWriter(UTF_8).use {
             it.write(hash)
         }
         return targetFile
