@@ -112,8 +112,8 @@ abstract class CreateZip @Inject constructor(
 ) : DefaultTask() {
 
     init {
-        group = "Custom"
-        description = "Create a zip file comprising all files located within a temporary directory."
+        group = CUSTOM_TASK_GROUP
+        description = "Creates a zip from aggregated and processed files"
     }
 
     @TaskAction
