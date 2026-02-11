@@ -3,8 +3,8 @@ package xyz.bobkinn.sonatypepublisher
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
 import org.gradle.api.publish.internal.PublicationInternal
 import org.gradle.api.publish.maven.MavenArtifact
 import org.gradle.api.publish.maven.MavenPublication
@@ -17,10 +17,11 @@ import javax.inject.Inject
 abstract class GenerateMavenArtifacts
     @Inject
     constructor(
-        @Internal val publication: MavenPublication,
+        @Internal val publication: Provider<MavenPublication>,
         @Internal val additionalTasks: List<String>,
     ) : DefaultTask() {
         init {
+            val publication = publication.get()
             if (publication is PublicationInternal<*>) {
                 val tasks = publication.publishableArtifacts.map {
                     it.buildDependencies.getDependencies(null)
@@ -38,9 +39,9 @@ abstract class GenerateMavenArtifacts
 
 abstract class AggregateFiles
 @Inject constructor(
-    @Internal val publication: MavenPublication,
+    @Internal val publication: Provider<MavenPublication>,
     @OutputDirectory
-    val targetDirectory: Directory
+    val targetDirectory: Provider<Directory>
 ) : DefaultTask() {
 
     init {
@@ -50,16 +51,18 @@ abstract class AggregateFiles
 
     @TaskAction
     fun action() {
-        val tempDirFile = targetDirectory.asFile
-        if (tempDirFile.exists()) tempDirFile.deleteRecursively()
-        tempDirFile.mkdirs()
+        val folder = targetDirectory.get().asFile
+        if (folder.exists()) folder.deleteRecursively()
+        folder.mkdirs()
+
+        val publication = publication.get()
 
         val artifactId = publication.artifactId
         val version = publication.version
 
         // Copy and rename all publishable artifacts directly into temp dir
         val pub = publication as PublicationInternal<*>
-        println("Aggregating ${pub.publishableArtifacts.size} artifacts into $targetDirectory")
+        println("Aggregating ${pub.publishableArtifacts.size} artifacts into $folder")
         pub.publishableArtifacts.forEach { it ->
 //            val producerTasks = it.buildDependencies.getDependencies(null)
 //            println("Artifact ${it.file}, prod: $producerTasks")
@@ -77,7 +80,7 @@ abstract class AggregateFiles
                 newName = "$artifactId-$version$cls.${it.extension}"
 //                println("were ${file.name}, become $newName")
             }
-            val targetFile = tempDirFile.resolve(newName)
+            val targetFile = folder.resolve(newName)
             file.copyTo(targetFile, overwrite = true)
 //            println("Copied $file to $targetFile")
         }
@@ -87,7 +90,7 @@ abstract class AggregateFiles
 abstract class ComputeHash
     @Inject
     constructor(
-        @Internal val directory: Directory,
+        @Internal val directory: Provider<Directory>,
         @Internal val additionalAlgorithms: List<String>,
     ) : DefaultTask() {
         init {
@@ -101,14 +104,14 @@ abstract class ComputeHash
 
         @TaskAction
         fun run() {
-            HashUtils.writesFilesHashes(directory.asFile,
+            HashUtils.writesFilesHashes(directory.get().asFile,
                 REQUIRED_ALGORITHMS + additionalAlgorithms)
         }
     }
 
 abstract class CreateZip @Inject constructor(
-    @get:InputDirectory val fromDirectory: DirectoryProperty,
-    @get:OutputFile val zipFile: RegularFileProperty
+    @get:InputDirectory val fromDirectory: Provider<Directory>,
+    @get:OutputFile val zipFile: Provider<RegularFile>
 ) : DefaultTask() {
 
     init {
@@ -133,7 +136,7 @@ abstract class CreateZip @Inject constructor(
 
 abstract class PublishToSonatypeCentral @Inject constructor(
     @InputFile
-    val zipFile: RegularFileProperty,
+    val zipFile: Provider<RegularFile>,
     @Input
     val config: SonatypePublishConfig
 ) : DefaultTask() {

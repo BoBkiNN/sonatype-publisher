@@ -1,9 +1,12 @@
 package xyz.bobkinn.sonatypepublisher
 
 import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.NamedDomainObjectProvider
+import org.gradle.api.internal.provider.Providers
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.publish.maven.MavenPublication
 import javax.inject.Inject
 
@@ -51,10 +54,21 @@ by objects.domainObjectContainer(SonatypePublishConfig::class.java) {
     val password: Property<String> =
         objects.property(String::class.java)
 
-    @Suppress("unused")
-    fun registerMaven(pub: MavenPublication) {
-        register(pub.name) {
+    fun registerMaven(name: String, pub: Provider<MavenPublication>,
+                      configuration: (SonatypePublishConfig) -> Unit = {}) {
+        register(name) {
             it.publication.set(pub)
+            configuration(it)
         }
+    }
+
+    fun registerMaven(name: String, pub: MavenPublication,
+                      configuration: (SonatypePublishConfig) -> Unit = {}) {
+        registerMaven(name, Providers.of(pub), configuration)
+    }
+
+    fun registerMaven(pub: NamedDomainObjectProvider<MavenPublication>,
+                      configuration: (SonatypePublishConfig) -> Unit = {}) {
+        registerMaven(pub.name, pub, configuration)
     }
 }
