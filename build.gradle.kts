@@ -8,7 +8,7 @@ plugins {
     id("com.gradle.plugin-publish") version "1.2.1"
 }
 
-group = "xyz.bobkinn"
+group = "io.github.bobkinn"
 version = rootProject.findProperty("version") as String
 
 repositories {
@@ -50,7 +50,7 @@ gradlePlugin {
     vcsUrl = "https://github.com/BoBkiNN/sonatype-maven-central-publisher.git"
 
     plugins.create("sonatype-publisher") {
-        id = "xyz.bobkinn.sonatype-publisher"
+        id = "$group.sonatype-publisher"
         implementationClass = "xyz.bobkinn.sonatypepublisher.SonatypePublishPlugin"
         displayName = "Sonatype Publisher"
         description = "Simple gradle plugin for building and uploading bundles to the Sonatype Maven Central Repository."

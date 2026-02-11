@@ -1,6 +1,5 @@
 package xyz.bobkinn.sonatypepublisher
 
-import org.gradle.api.Named
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
@@ -17,7 +16,7 @@ enum class PublishingType {
 abstract class SonatypePublishConfig @Inject constructor(
     objects: ObjectFactory,
     val name: String
-) : Named {
+) {
 
     val publishingType: Property<PublishingType> =
         objects.property(PublishingType::class.java)
