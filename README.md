@@ -49,4 +49,8 @@ plugins {
 This is fork of [sonatype-maven-central-publisher](https://github.com/ani2fun/sonatype-maven-central-publisher) 
 gradle plugin which is targeted to be compatible with existing publications.
 
+Fixed issues:
+- [#4 - windows support](https://github.com/ani2fun/sonatype-maven-central-publisher/issues/4)
+- [#3 - Usage of addLast](https://github.com/ani2fun/sonatype-maven-central-publisher/issues/3)
+
 There are also more plans for plugin in [TODO file](/TODO.md)
