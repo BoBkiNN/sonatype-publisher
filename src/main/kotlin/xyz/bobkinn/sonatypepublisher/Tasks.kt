@@ -133,7 +133,9 @@ abstract class CreateZip @Inject constructor(
 
 abstract class PublishToSonatypeCentral @Inject constructor(
     @InputFile
-    val zipFile: RegularFileProperty
+    val zipFile: RegularFileProperty,
+    @Input
+    val config: SonatypePublishConfig
 ) : DefaultTask() {
 
     init {
@@ -141,21 +143,20 @@ abstract class PublishToSonatypeCentral @Inject constructor(
         description = "Publish to New Sonatype Maven Central Repository."
     }
 
-    private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
-
     @TaskAction
     fun uploadZip() {
-        val pub = extension.publication.get()
-        logger.lifecycle("Uploading publication ${pub.name} to Sonatype..")
+        logger.lifecycle("Uploading ${config.name} to Sonatype..")
         val id = try {
-            PublisherApi.uploadBundle(zipFile.get(), extension.publishingType.get(),
-                pub, extension.username.get(), extension.password.get())
+            PublisherApi.uploadBundle(zipFile.get(), config.publishingType.get(),
+                config.publication.get(), config.username.get(), config.password.get())
         } catch (e: PublisherApi.PortalApiError) {
             throw GradleException("Failed to perform upload", e)
         }
         logger.lifecycle("Publication uploaded with deployment id $id")
     }
 }
+
+// common tasks
 
 abstract class GetDeploymentStatus : DefaultTask() {
     init {

@@ -1,6 +1,7 @@
 package xyz.bobkinn.sonatypepublisher
 
-import org.gradle.api.Project
+import org.gradle.api.Named
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -13,21 +14,48 @@ enum class PublishingType {
     USER_MANAGED
 }
 
-open class SonatypePublishExtension
+abstract class SonatypePublishConfig @Inject constructor(
+    objects: ObjectFactory,
+    val name: String
+) : Named {
 
-    @Inject
-    constructor(objectFactory: ObjectFactory) {
-        val publishingType: Property<PublishingType> = objectFactory.property(PublishingType::class.java)
-        val additionalTasks: ListProperty<String> = objectFactory.listProperty(String::class.java)
-        val additionalAlgorithms: ListProperty<String> = objectFactory.listProperty(String::class.java)
+    val publishingType: Property<PublishingType> =
+        objects.property(PublishingType::class.java)
 
-        val username: Property<String> = objectFactory.property(String::class.java)
-        val password: Property<String> = objectFactory.property(String::class.java)
+    val additionalTasks: ListProperty<String> =
+        objects.listProperty(String::class.java)
 
-        val publication: Property<MavenPublication> = objectFactory.property(MavenPublication::class.java)
+    val additionalAlgorithms: ListProperty<String> =
+        objects.listProperty(String::class.java)
 
-        companion object {
-            internal fun Project.toSonatypeExtension(): SonatypePublishExtension =
-                extensions.create("sonatypeCentralPublishExtension", SonatypePublishExtension::class.java)
+    val username: Property<String> =
+        objects.property(String::class.java)
+
+    val password: Property<String> =
+        objects.property(String::class.java)
+
+    val publication: Property<MavenPublication> =
+        objects.property(MavenPublication::class.java)
+}
+
+abstract class SonatypePublishExtension @Inject constructor(
+    objects: ObjectFactory
+) : NamedDomainObjectContainer<SonatypePublishConfig>
+by objects.domainObjectContainer(SonatypePublishConfig::class.java) {
+
+    val publishingType: Property<PublishingType> =
+        objects.property(PublishingType::class.java)
+
+    val username: Property<String> =
+        objects.property(String::class.java)
+
+    val password: Property<String> =
+        objects.property(String::class.java)
+
+    @Suppress("unused")
+    fun registerMaven(pub: MavenPublication) {
+        register(pub.name) {
+            it.publication.set(pub)
         }
     }
+}
