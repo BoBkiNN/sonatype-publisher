@@ -18,7 +18,7 @@ extensions.configure(SonatypeCentralPublishExtension::class) {
 
 ## Adding to project:
 
-**Java 17 or later required**
+**Java 17 or later required**<br>
 Setup JitPack plugin repository in `settings.gradle.kts`:
 ```kotlin
 pluginManagement {
