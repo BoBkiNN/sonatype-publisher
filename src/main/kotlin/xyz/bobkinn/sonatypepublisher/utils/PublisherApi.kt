@@ -147,8 +147,11 @@ object PublisherApi {
         val deploymentState: DeploymentState,
         val errors: Any
     ) {
+        @Transient
         val isPublished = deploymentState == DeploymentState.PUBLISHED
+        @Transient
         val isFailed = deploymentState == DeploymentState.FAILED
+        @Transient
         val isValidated = deploymentState == DeploymentState.VALIDATED
     }
 
