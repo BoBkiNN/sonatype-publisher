@@ -40,7 +40,7 @@ abstract class SonatypePublishConfig : Named {
     @get:Input
     abstract val additionalAlgorithms: ListProperty<String>
 
-    @get:Input
+    @get:Internal
     abstract val username: Property<String>
 
     @get:Internal
