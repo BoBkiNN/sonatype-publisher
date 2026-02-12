@@ -296,14 +296,18 @@ fun updateGetDeployments(project: Project, logger: Logger, onlyId: String? = nul
 }
 
 abstract class CheckDeployments : DefaultTask() {
+    @get:Input
+    @get:Optional
+    abstract val deploymentId: Property<String>
+
     init {
         group = TASKS_GROUP
         description = "Update current deployments information and print its statuses." +
                 "Pass deploymentId property to specify exact deployment"
+        deploymentId.convention(
+            project.providers.gradleProperty("deploymentId")
+        )
     }
-
-    @Input
-    val deploymentId: String? = project.findProperty("deploymentId")?.toString()
 
     private fun logStatus(status: PublisherApi.DeploymentStatus) {
         logger.info("Deployment ${status.deploymentId} - ${status.deploymentState}:")
@@ -321,6 +325,7 @@ abstract class CheckDeployments : DefaultTask() {
 
     @TaskAction
     fun executeTask() {
+        val deploymentId = deploymentId.orNull
         val dd = updateGetDeployments(thisProject, logger, deploymentId)
         deploymentId?.let {
             if (it.isBlank()) throw GradleException("Passed deploymentId property is blank")
