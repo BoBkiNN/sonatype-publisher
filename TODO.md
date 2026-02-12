@@ -1,3 +1,3 @@
 
 ## TODO:
-- (empty)
+- Possibly make checksums files be artifacts instead
