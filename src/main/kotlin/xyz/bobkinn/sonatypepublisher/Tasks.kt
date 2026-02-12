@@ -249,7 +249,7 @@ abstract class PublishDeployment : DefaultTask() {
         StoredDeploymentsManager.update(project, deploymentId) {
             if (it == null) return@update null
             val st = it.deployment ?: return@update null
-            it.update(st.copy(deploymentState = PublisherApi.DeploymentState.PUBLISHING))
+            it.updated(st.copy(deploymentState = PublisherApi.DeploymentState.PUBLISHING))
             it
         }
     }
@@ -282,7 +282,7 @@ private fun fetchAndUpdateDeployments(dd: DeploymentsData, extension: SonatypePu
             dd.published.put(d.id, d)
         } else {
             // update status
-            val upd = d.update(status)
+            val upd = d.updated(status)
             updated.add(upd)
         }
     }
@@ -410,7 +410,7 @@ abstract class PublishValidatedDeployments : DefaultTask() {
             }
             c++
             // change state to publishing
-            dep.update(status.copy(deploymentState = PublisherApi.DeploymentState.PUBLISHING))
+            dep.updated(status.copy(deploymentState = PublisherApi.DeploymentState.PUBLISHING))
         }
         logger.lifecycle("Published $c validated deployment(s) out of total ${dd.current.size}. " +
                 "See dashboard for status or run checkDeployments task")

@@ -28,7 +28,7 @@ data class Deployment(
 
     constructor(id: String) : this(id, null, System.currentTimeMillis())
 
-    fun update(data: PublisherApi.DeploymentStatus): Deployment {
+    fun updated(data: PublisherApi.DeploymentStatus): Deployment {
         return copy(deployment = data, timestamp = timestamp())
     }
 }
