@@ -16,7 +16,11 @@ using [Portal Publisher API](https://central.sonatype.org/publish/publish-portal
 1. Add and apply plugin
 2. Configure extension:
 ```kotlin
-extensions.configure(SonatypePublishExtension::class) {
+// add imports
+import xyz.bobkinn.sonatypepublisher.PublishingType
+import xyz.bobkinn.sonatypepublisher.sonatypePublish
+
+sonatypePublish {
     // specify maven central repository token username and password
     username = System.getenv("MAVEN_CENTRAL_USERNAME")
     password = System.getenv("MAVEN_CENTRAL_PASSWORD")

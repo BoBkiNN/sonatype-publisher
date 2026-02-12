@@ -1,8 +1,10 @@
 package xyz.bobkinn.sonatypepublisher
 
+import org.gradle.api.Action
 import org.gradle.api.Named
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
+import org.gradle.api.Project
 import org.gradle.api.internal.provider.Providers
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
@@ -86,3 +88,9 @@ by objects.domainObjectContainer(SonatypePublishConfig::class.java) {
         registerMaven(pub.name, pub, configuration)
     }
 }
+
+@Suppress("unused")
+fun Project.sonatypePublish(action: Action<SonatypePublishExtension>) {
+    extensions.configure(EXTENSION_NAME, action)
+}
+
