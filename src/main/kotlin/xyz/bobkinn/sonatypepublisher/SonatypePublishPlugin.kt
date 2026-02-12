@@ -61,9 +61,8 @@ fun registerTasksPipeline(
     val name = config.name.capitalized()
 
     val buildArtifacts = project.tasks.register("build${name}Artifacts",
-        BuildPublicationArtifacts::class.java)
+        BuildPublicationArtifacts::class.java, pub)
     buildArtifacts.configure {
-        it.publication.set(pub)
         it.additionalTasks.set(config.additionalTasks)
     }
 
