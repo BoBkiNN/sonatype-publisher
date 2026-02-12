@@ -21,6 +21,9 @@ enum class PublishingType {
 
 abstract class SonatypePublishConfig : Named {
 
+    @Internal
+    abstract override fun getName(): String
+
     @get:Input
     abstract val publishingType: Property<PublishingType>
 
