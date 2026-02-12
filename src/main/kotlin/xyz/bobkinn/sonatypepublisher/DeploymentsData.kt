@@ -85,4 +85,12 @@ object StoredDeploymentsManager {
         save(project, d)
     }
 
+    fun update(project: Project, id: String, action: (Deployment?) -> Deployment?) {
+        val d = load(project)
+        val dp = d.current[id]
+        val ndp = action(dp)
+        if (ndp == null) d.current.remove(id)
+        else d.current[id] = ndp
+        save(project, d)
+    }
 }

@@ -184,6 +184,7 @@ abstract class DropDeployment : DefaultTask() {
 
     @TaskAction
     fun executeTask() {
+        if (deploymentId.isBlank()) throw IllegalArgumentException("Blank or no deploymentId is passed")
         logger.lifecycle("Dropping deployment for deploymentId=$deploymentId ...")
         try {
             PublisherApi.dropDeployment(deploymentId, extension.username.get(), extension.password.get())
@@ -194,6 +195,38 @@ abstract class DropDeployment : DefaultTask() {
 
         logger.debug("Removing deployment from current list..")
         StoredDeploymentsManager.removeCurrent(project, deploymentId)
+    }
+}
+
+abstract class PublishDeployment : DefaultTask() {
+    init {
+        group = TASKS_GROUP
+        description = "Publish deployment using deploymentId."
+    }
+
+    @Input
+    var deploymentId: String = project.findProperty("deploymentId")?.toString() ?: ""
+
+    private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
+
+    @TaskAction
+    fun executeTask() {
+        if (deploymentId.isBlank()) throw IllegalArgumentException("Blank or no deploymentId is passed")
+        logger.lifecycle("Publishing deployment with deploymentId=$deploymentId ...")
+        try {
+            PublisherApi.publishDeployment(deploymentId, extension.username.get(), extension.password.get())
+        } catch (e: PublisherApi.PortalApiError) {
+            throw GradleException("Failed to perform drop", e)
+        }
+        logger.lifecycle("Deployment $deploymentId is now publishing")
+
+        logger.debug("Switching deployment state to publishing")
+        StoredDeploymentsManager.update(project, deploymentId) {
+            if (it == null) return@update null
+            val st = it.deployment ?: return@update null
+            st.copy(deploymentState = PublisherApi.DeploymentState.PUBLISHING)
+            it.update(st)
+        }
     }
 }
 

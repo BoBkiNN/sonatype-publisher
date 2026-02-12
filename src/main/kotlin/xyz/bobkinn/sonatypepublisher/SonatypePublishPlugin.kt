@@ -32,6 +32,7 @@ class SonatypePublishPlugin : Plugin<Project> {
 }
 
 fun registerCommonTasks(project: Project) {
+    project.tasks.register("publishDeployment", PublishDeployment::class.java)
     project.tasks.register("dropDeployment", DropDeployment::class.java)
     project.tasks.register("checkDeployments", CheckDeployments::class.java)
     project.tasks.register("dropFailedDeployments", DropFailedDeployments::class.java)
