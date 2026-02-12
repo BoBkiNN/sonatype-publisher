@@ -147,12 +147,12 @@ object PublisherApi {
         val deploymentState: DeploymentState,
         val errors: Any
     ) {
-        @Transient
-        val isPublished = deploymentState == DeploymentState.PUBLISHED
-        @Transient
-        val isFailed = deploymentState == DeploymentState.FAILED
-        @Transient
-        val isValidated = deploymentState == DeploymentState.VALIDATED
+        val isPublished
+            get() = deploymentState == DeploymentState.PUBLISHED
+        val isFailed
+            get() = deploymentState == DeploymentState.FAILED
+        val isValidated
+            get() = deploymentState == DeploymentState.VALIDATED
     }
 
     fun getDeploymentStatus(id: String, username: String, password: String): DeploymentStatus? {
