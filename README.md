@@ -68,3 +68,118 @@ Fixed issues:
 - [#3 - Usage of addLast](https://github.com/ani2fun/sonatype-maven-central-publisher/issues/3)
 
 There are also more plans for plugin in [TODO file](/TODO.md)
+
+## General Deployment Tasks
+
+These tasks provide **manual control and bulk automation** for Sonatype Portal deployments.
+They are **not bound to specific project configurations** — instead they operate using stored deployment IDs and Sonatype credentials defined in your `SonatypePublishExtension`.
+
+All tasks use credentials defined in your plugin extension:
+```kotlin
+sonatypePublish {
+    username.set("your-username")
+    password.set("your-password")
+}
+```
+
+---
+
+### 🔎 `checkDeployments`
+
+Fetches the latest status of stored deployments and prints their current state.
+
+**What it does**
+
+* Updates deployment statuses from Sonatype Portal
+* Prints details (state, name, errors if present)
+* Can target a specific deployment or all stored ones
+
+**Usage**
+
+```bash
+# Check all current deployments
+./gradlew checkDeployments
+
+# Check a specific deployment
+./gradlew checkDeployments -PdeploymentId=<deploymentId>
+```
+
+**Behavior**
+
+* Removes deployments no longer present on the portal
+* Moves published deployments to the published list
+* Updates statuses for active deployments
+
+---
+
+### 🚀 `publishDeployment`
+
+Publishes a specific deployment using its deployment ID.
+
+**Usage**
+
+```bash
+./gradlew publishDeployment -PdeploymentId=<deploymentId>
+```
+
+**Behavior**
+
+* Triggers publish through the Sonatype Portal API
+* Updates stored deployment state to `PUBLISHING`
+* Fails if `deploymentId` is missing or blank
+
+---
+
+### ❌ `dropDeployment`
+
+Drops a specific deployment from the portal.
+
+**Usage**
+
+```bash
+./gradlew dropDeployment -PdeploymentId=<deploymentId>
+```
+
+**Behavior**
+
+* Calls the Portal API to drop the deployment
+* Removes it from the stored current deployment list
+
+---
+
+### 🧹 `dropFailedDeployments`
+
+Fetches latest statuses and automatically drops all failed deployments.
+
+**Usage**
+
+```bash
+./gradlew dropFailedDeployments
+```
+
+**Behavior**
+
+* Updates deployment status first
+* Drops only deployments marked as failed
+* Saves updated deployment data afterward
+
+---
+
+### ✅ `publishValidatedDeployments`
+
+Fetches latest statuses and publishes all validated deployments automatically.
+
+**Usage**
+
+```bash
+./gradlew publishValidatedDeployments
+```
+
+**Behavior**
+
+* Updates deployment status first
+* Publishes deployments marked as validated
+* Updates their state to `PUBLISHING`
+* Saves updated deployment data
+
+---
