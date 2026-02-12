@@ -97,8 +97,9 @@ fun registerTasksPipeline(
     val archiveFile = pubFolder.map { it.file(UPLOAD_ZIP_NAME) }
     val createZip = project.tasks.register("create${name}Zip", CreateZip::class.java)
     createZip.configure {
-        it.fromDirectory.set(computeHashes.flatMap { it.directory })
+        it.fromDirectory.set(aggregateFolder)
         it.zipFile.set(archiveFile)
+        it.dependsOn(computeHashes)
     }
 
     // Publish to Sonatype Maven Central Repository
