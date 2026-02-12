@@ -185,6 +185,7 @@ abstract class GetDeploymentStatus : DefaultTask() {
     @TaskAction
     fun executeTask() {
         logger.lifecycle("Getting deployment status for $deploymentId")
+        if (deploymentId.isBlank()) throw IllegalArgumentException("No deployment id provided")
         val status = try {
             PublisherApi.getDeploymentStatus(deploymentId, extension.username.get(), extension.password.get())
         } catch (e: PublisherApi.PortalApiError) {
@@ -348,5 +349,42 @@ abstract class DropFailed : DefaultTask() {
             }
         }
         logger.lifecycle("Dropped $c failed deployment(s) out of total ${dd.current.size}")
+    }
+}
+
+abstract class PublishValidatedDeployments : DefaultTask() {
+    init {
+        group = TASKS_GROUP
+        description = "Fetches and updates current deployments and then publishes any validated current deployments"
+    }
+
+    private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
+
+    @TaskAction
+    fun executeTask() {
+        val dd = updateGetDeployments(project, logger)
+        val username = extension.username.get()
+        val password = extension.password.get()
+
+        logger.lifecycle("Publishing validated deployments..")
+        var c = 0
+        for (dep in dd.current.values) {
+            val status = dep.deployment ?: continue
+            if (!status.isValidated) continue
+            try {
+                PublisherApi.publishDeployment(dep.id, username, password)
+            } catch (e: PublisherApi.PortalApiError) {
+                throw GradleException("Failed to publish validated deployment ${dep.id}", e)
+            }
+            c++
+            // change state to publishing
+            dep.update(status.copy(deploymentState = PublisherApi.DeploymentState.PUBLISHING))
+        }
+        logger.lifecycle("Published $c validated deployment(s) out of total ${dd.current.size}. " +
+                "See dashboard for status or run checkDeployments task")
+        if (c > 0) {
+            logger.debug("Saving deployment data after publishes")
+            StoredDeploymentsManager.save(project, dd)
+        }
     }
 }

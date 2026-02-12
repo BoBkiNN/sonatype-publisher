@@ -32,15 +32,11 @@ class SonatypePublishPlugin : Plugin<Project> {
 }
 
 fun registerCommonTasks(project: Project) {
-    // Get the deployment status of published deployment by deploymentId
     project.tasks.register("getDeploymentStatus", GetDeploymentStatus::class.java)
-
-    // Drop a deployment by deploymentId
     project.tasks.register("dropDeployment", DropDeployment::class.java)
-
     project.tasks.register("checkDeployments", CheckDeployments::class.java)
-
     project.tasks.register("dropFailedDeployments", DropFailed::class.java)
+    project.tasks.register("publishValidatedDeployments", PublishValidatedDeployments::class.java)
 }
 
 const val PLUGIN_FOLDER_NAME = "sonatypePublish"

@@ -135,6 +135,7 @@ object PublisherApi {
     enum class DeploymentState {
         PENDING,
         VALIDATING,
+        VALIDATED,
         PUBLISHING,
         PUBLISHED,
         FAILED
@@ -148,6 +149,7 @@ object PublisherApi {
     ) {
         val isPublished = deploymentState == DeploymentState.PUBLISHED
         val isFailed = deploymentState == DeploymentState.FAILED
+        val isValidated = deploymentState == DeploymentState.VALIDATED
     }
 
     fun getDeploymentStatus(id: String, username: String, password: String): DeploymentStatus? {
@@ -171,6 +173,22 @@ object PublisherApi {
                     throw PortalApiError("Failed to read returned status", e)
                 }
             } ?: throw PortalApiError("No body in response")
+        }
+    }
+
+    fun publishDeployment(id: String, username: String, password: String) {
+        var url = "$BASE_URL/deployment/$id"
+        val request = Request.Builder()
+            .post(EMPTY_REQUEST)
+            .addAuth(username, password)
+            .url(url)
+            .build()
+        val client = createHttpClient()
+        client.newCall(request).execute().use { r ->
+            if (!r.isSuccessful) {
+                throw PortalApiError("Failed to publish deployment", r.toPortalApiError())
+            }
+            return
         }
     }
 }
