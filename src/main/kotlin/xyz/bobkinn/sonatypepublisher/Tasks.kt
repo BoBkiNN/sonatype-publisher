@@ -206,10 +206,12 @@ private fun getStatus(id: String, extension: SonatypePublishExtension): Publishe
     }
 }
 
-private fun fetchAndUpdateDeployments(dd: DeploymentsData, extension: SonatypePublishExtension) {
+private fun fetchAndUpdateDeployments(dd: DeploymentsData, extension: SonatypePublishExtension,
+                                      onlyId: String? = null) {
     val it = dd.current.values.iterator()
     while (it.hasNext()) {
         val d = it.next()
+        if (onlyId != null && d.id != onlyId) continue
         val status = getStatus(d.id, extension)
         if (status == null) {
             // removed
@@ -225,11 +227,12 @@ private fun fetchAndUpdateDeployments(dd: DeploymentsData, extension: SonatypePu
     }
 }
 
-fun updateGetDeployments(project: Project, logger: Logger): DeploymentsData {
+fun updateGetDeployments(project: Project, logger: Logger, onlyId: String? = null): DeploymentsData {
     val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
     val dd = StoredDeploymentsManager.load(project)
-    logger.lifecycle("Fetching and updating ${dd.current.size} deployment(s)..")
-    fetchAndUpdateDeployments(dd, extension)
+    if (onlyId != null) logger.lifecycle("Fetching and updating deployment $onlyId..")
+    else logger.lifecycle("Fetching and updating ${dd.current.size} deployment(s)..")
+    fetchAndUpdateDeployments(dd, extension, onlyId)
     StoredDeploymentsManager.save(project, dd)
     return dd
 }
@@ -258,7 +261,7 @@ abstract class CheckDeployments : DefaultTask() {
 
     @TaskAction
     fun executeTask() {
-        val dd = updateGetDeployments(project, logger)
+        val dd = updateGetDeployments(project, logger, deploymentId)
         deploymentId?.let {
             if (it.isBlank()) throw GradleException("Passed deploymentId property is blank")
             logger.info("--- Deployment $it status:")
