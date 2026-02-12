@@ -318,6 +318,8 @@ abstract class CheckDeployments : DefaultTask() {
     private fun logStatus(status: PublisherApi.DeploymentStatus) {
         logger.lifecycle("Deployment ${status.deploymentId} - ${status.deploymentState}:")
         logger.lifecycle("  Name: ${status.deploymentName}")
+
+        if (status.errors is Map<*, *> && status.errors.isEmpty()) return
         val errorsJson = PublisherApi.GSON.toJson(status.errors)
         logger.lifecycle("  Errors: $errorsJson")
     }
