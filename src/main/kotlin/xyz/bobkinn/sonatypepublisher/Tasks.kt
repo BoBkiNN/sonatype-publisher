@@ -28,9 +28,9 @@ abstract class BuildPublicationArtifacts
             if (publication is PublicationInternal<*>) {
                 val tasks = publication.publishableArtifacts.map {
                     it.buildDependencies.getDependencies(null)
-                }
+                }.flatten()
                 dependsOn(tasks)
-                logger.debug("Publication depends on tasks: {}", tasks.flatten().map { it.path })
+                logger.debug("Publication depends on tasks: {}", tasks.map { it.path })
             }
             dependsOn(*additionalTasks.toTypedArray())
 
@@ -55,7 +55,9 @@ abstract class AggregateFiles
     @TaskAction
     fun action() {
         val folder = targetDirectory.get().asFile
-        if (folder.exists()) folder.deleteRecursively()
+        if (folder.exists() && !folder.deleteRecursively()) {
+            throw GradleException("Failed to clean directory $folder")
+        }
         folder.mkdirs()
 
         val publication = publication.get()
@@ -176,7 +178,7 @@ abstract class DropDeployment : DefaultTask() {
     }
 
     @Input
-    var deploymentId: String = project.findProperty("deploymentId")?.toString() ?: ""
+    val deploymentId: String = project.findProperty("deploymentId")?.toString() ?: ""
 
     private val extension = project.extensions.getByType(SonatypePublishExtension::class.java)
 
@@ -222,8 +224,8 @@ abstract class PublishDeployment : DefaultTask() {
         StoredDeploymentsManager.update(project, deploymentId) {
             if (it == null) return@update null
             val st = it.deployment ?: return@update null
-            st.copy(deploymentState = PublisherApi.DeploymentState.PUBLISHING)
-            it.update(st)
+            it.update(st.copy(deploymentState = PublisherApi.DeploymentState.PUBLISHING))
+            it
         }
     }
 }
