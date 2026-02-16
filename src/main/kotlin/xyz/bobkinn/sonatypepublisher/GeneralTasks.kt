@@ -95,7 +95,8 @@ private fun fetchAndUpdateDeployments(dd: DeploymentsData, extension: SonatypePu
         } else if (status.isPublished) {
             // state changed to published
             it.remove()
-            dd.published.put(d.id, d)
+            val nd = d.updated(status)
+            dd.published.put(d.id, nd)
         } else {
             // update status
             val upd = d.updated(status)
